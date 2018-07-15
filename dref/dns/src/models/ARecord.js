@@ -10,6 +10,11 @@ var ARecordSchema = new mongoose.Schema({
     type: String,
     default: '127.0.0.1'
   },
+  port: {
+    type: Number,
+    min: 1,
+    max: 65535
+  },
   rebind: {
     type: Boolean,
     default: false

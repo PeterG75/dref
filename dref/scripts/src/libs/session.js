@@ -44,7 +44,8 @@ export default class Session {
     // create the arecord
     network.postJSON(this.baseURL + '/arecords', {
       domain: target + '.' + window.env.domain,
-      address: address
+      address: address,
+      port: port
     })
 
     // create the iframe
