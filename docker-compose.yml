@@ -46,7 +46,9 @@ services:
       - mongo
 
   api:
-    image: node:9.11.1-alpine
+    build:
+      context: .
+      dockerfile: iptables-node-alpine.Dockerfile
     networks:
       - dref
     ports:
