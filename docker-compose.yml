@@ -51,6 +51,8 @@ services:
       dockerfile: iptables-node-alpine.Dockerfile
     networks:
       - dref
+    cap_add:
+      - NET_ADMIN
     ports:
       - 0.0.0.0:80:80
       - 0.0.0.0:443:80
