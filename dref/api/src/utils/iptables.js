@@ -55,36 +55,44 @@ function checkRuleExists (args) {
 }
 
 export function execute ({table, command, chain, target, fromPort, toPort, srcAddress} = {}) {
-  fromPort = fromPort || null
-  toPort = toPort || null
-  srcAddress = srcAddress || null
+  return new Promise((resolve, reject) => {
+    fromPort = fromPort || null
+    toPort = toPort || null
+    srcAddress = srcAddress || null
 
-  checkRuleExists(getRule({
-    table: table,
-    command: Command.CHECK,
-    chain: chain,
-    target: target,
-    fromPort: fromPort,
-    toPort: toPort,
-    srcAddress: srcAddress
-  })).then((exists) => {
-    if (([Command.APPEND, Command.INSERT].includes(command) && exists) || (command === Command.DELETE && !exists)) {
-      return console.log(`ignoring execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
-    }
-
-    const iptables = spawn('iptables', getRule({
+    checkRuleExists(getRule({
       table: table,
-      command: command,
+      command: Command.CHECK,
       chain: chain,
       target: target,
       fromPort: fromPort,
       toPort: toPort,
       srcAddress: srcAddress
-    }))
+    })).then((exists) => {
+      if (([Command.APPEND, Command.INSERT].includes(command) && exists) || (command === Command.DELETE && !exists)) {
+        console.log(`ignoring execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
+        resolve(false)
+      }
 
-    iptables.on('close', (code) => {
-      if (code === 0) return console.log(`success execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
-      return console.log(`fail execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
+      const iptables = spawn('iptables', getRule({
+        table: table,
+        command: command,
+        chain: chain,
+        target: target,
+        fromPort: fromPort,
+        toPort: toPort,
+        srcAddress: srcAddress
+      }))
+
+      iptables.on('close', (code) => {
+        if (code === 0) {
+          console.log(`success execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
+          resolve(true)
+        } else {
+          console.log(`fail execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
+          resolve(false)
+        }
+      })
     })
   })
 }
