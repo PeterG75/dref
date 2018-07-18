@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { Router } from 'express'
 import { check, validationResult } from 'express-validator/check'
+import * as iptables from '../utils/iptables'
 
 const router = Router()
 const ARecord = mongoose.model('ARecord')
@@ -27,12 +28,36 @@ router.post('/', [
 
   ARecord.findOneAndUpdate({
     domain: req.body.domain
-  }, record, { upsert: true }, function (err) {
+  }, record, { upsert: true, new: true }, function (err, doc) {
     if (err) {
       console.log(err)
       return res.status(400).send()
     }
-    res.status(204).send()
+
+    const ipv4Match = req.ip.match(/::ffff:(\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3})/)
+    if (!ipv4Match) {
+      console.log(`source IP ${req.ip} doesn't appear to be IPv4, can't manipulate iptables and fast-rebind not available`)
+      return res.status(204).send()
+    }
+
+    // if rebind is set to true, we INSERT a REDIRECT rule to port 1 (closed, so essentially blocking)
+    // otherwise we DELETE any existing REDIRECT rules (unbind, allowing access to API)
+    const ipv4 = ipv4Match[1]
+    let command = iptables.Command.DELETE
+    if (req.body.rebind) command = iptables.Command.INSERT
+
+    iptables.execute({
+      table: iptables.Table.NAT,
+      command: command,
+      chain: iptables.Chain.PREROUTING,
+      target: iptables.Target.REDIRECT,
+      fromPort: doc.port,
+      toPort: 1,
+      srcAddress: ipv4
+    }).then(status => {
+      if (status) return res.status(204).send()
+      return res.status(400).send()
+    })
   })
 })
 
