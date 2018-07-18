@@ -60,7 +60,7 @@ services:
       - 0.0.0.0:8080:80
       - 0.0.0.0:8888:80
     environment:
-      - PORT=80
+      - PORT=45000
     volumes:
       - ./dref/api/:/src:rw
       - ./dref-config.yml:/tmp/dref-config.yml:ro
