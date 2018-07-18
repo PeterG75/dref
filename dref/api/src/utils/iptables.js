@@ -71,7 +71,7 @@ export function execute ({table, command, chain, target, fromPort, toPort, srcAd
     })).then((exists) => {
       if (([Command.APPEND, Command.INSERT].includes(command) && exists) || (command === Command.DELETE && !exists)) {
         console.log(`ignoring execute(${table}, ${command}, ${chain}, ${target}, ${fromPort}, ${toPort}, ${srcAddress})`)
-        resolve(false)
+        resolve(true)
       }
 
       const iptables = spawn('iptables', getRule({
