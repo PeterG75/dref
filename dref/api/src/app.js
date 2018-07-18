@@ -5,6 +5,7 @@ import logger from 'morgan'
 import mongoose from 'mongoose'
 import YAML from 'yamljs'
 import cors from 'cors'
+import * as iptables from './utils/iptables'
 
 /**
  * Mongo
@@ -40,6 +41,17 @@ for (let i = 0; i < global.config.targets.length; i++) {
     console.log('dref: Configured target\n' + JSON.stringify(doc, null, 4))
   })
 }
+
+/**
+ * Set up default iptable rules to forward all ports to the API
+ */
+iptables.execute({
+  table: iptables.Table.NAT,
+  command: iptables.Command.INSERT,
+  chain: iptables.Chain.PREROUTING,
+  target: iptables.Target.REDIRECT,
+  toPort: process.env.PORT || '3000'
+})
 
 /**
  * Import routes
