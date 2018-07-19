@@ -63,18 +63,27 @@ export default class Session {
         rebind: true
       }, () => {
         // wait for rebinding to occur
+        const callWait = (time) => {
+          window.setTimeout(() => {
+            wait(time)
+          }, time)
+        }
+
         const wait = (time) => {
           network.get(this.baseURL + '/checkpoint', function () {
-            window.setTimeout(() => {
-              console.log('/checkpoint success - waiting for rebind - ' + time)
-              wait(time * 2)
-            }, time)
+            console.log('/checkpoint success - ' + time)
+            callWait(time * 2)
+          }, function (code) {
+            if (code === 404) {
+              console.log('/checkpoint 404 - ' + time)
+              resolve()
+            } else {
+              console.log('/checkpoint error - ' + time)
+              callWait(time * 2)
+            }
           }, function () {
-            console.log('/checkpoint failed - rebind done - ' + time)
-            resolve()
-          }, function () {
-            console.log('/checkpoint timeout - waiting for rebind - ' + time)
-            wait(time * 2)
+            console.log('/checkpoint timeout - ' + time)
+            callWait(time * 2)
           })
         }
         wait(1000)
