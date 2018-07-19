@@ -71,17 +71,24 @@ export default class Session {
 
         const wait = (time) => {
           network.get(this.baseURL + '/checkpoint', function () {
+            // if we get a 200 on /checkpoint, we're still hitting the API
             console.log('/checkpoint success - ' + time)
             callWait(time * 2)
           }, function (code) {
+            // a valid HTTP 404 error means we've rebinded to an HTTP service
+            // NOTE: this check means we can't support cross-protocol attacks
             if (code === 404) {
               console.log('/checkpoint 404 - ' + time)
               resolve()
             } else {
+              // connection error, assume we've not rebinded yet
+              // NOTE: this check means we can't support cross-protocol attacks
+              // we'd need more granular checks on the error raised
               console.log('/checkpoint error - ' + time)
-              callWait(time * 2)
+              callWait(time)
             }
           }, function () {
+            // a timeout means we're not rebinded yet
             console.log('/checkpoint timeout - ' + time)
             callWait(time * 2)
           })
