@@ -62,20 +62,26 @@ export default class Session {
         rebind: true
       }, () => {
         // wait for rebinding to occur
-        const callWait = (time) => {
-          window.setTimeout(() => {
-            wait(time)
-          }, time)
-        }
-
         const wait = (time) => {
           network.get(this.baseURL + '/checkpoint', function () {
+            // success callback
+            // if we're still getting a 200 OK on /checkpoint it means we're
+            // doing slow-rebind and we've not yet rebinded
             window.setTimeout(() => {
               wait(time)
             }, time)
           }, function () {
-            // a timeout means we're not rebinded yet
-            callWait(time * 2)
+            // fail callback
+            // if we're getting an error it means we've rebinded
+            // (ie: the test path /checkpoint doesn't exist on the host)
+            resolve()
+          }, function () {
+            // timeout callback
+            // timeout happens with fast-rebind when we've not rebinded to the
+            // target yet (or the host is not live/can't answer)
+            window.setTimeout(() => {
+              wait(time)
+            }, time)
           })
         }
         wait(2000)
