@@ -28,8 +28,9 @@ export default class Session {
     network.postJSON(this.logURL, payload)
   }
 
-  createRebindFrame (address, port, {target, script, args} = {}) {
+  createRebindFrame (address, port, {target, script, fastRebind, args} = {}) {
     target = target || crypto.randomHex(24)
+    fastRebind = fastRebind || false
     args = args || {}
     args._rebind = true
 
@@ -37,6 +38,7 @@ export default class Session {
     network.postJSON(this.baseURL + '/targets', {
       target: target,
       script: script || window.env.script,
+      fastRebind: fastRebind,
       args: args
     })
 

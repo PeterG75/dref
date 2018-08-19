@@ -34,6 +34,7 @@ for (let i = 0; i < global.config.targets.length; i++) {
     target: global.config.targets[i].target,
     script: global.config.targets[i].script,
     hang: global.config.targets[i].hang,
+    fastRebind: global.config.targets[i].fastRebind,
     args: global.config.targets[i].args
   }
 
