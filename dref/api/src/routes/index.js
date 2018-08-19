@@ -18,7 +18,8 @@ router.get('/', targeter, function (req, res, next) {
         script: target.script,
         domain: global.config.general.domain,
         address: global.config.general.address,
-        logPort: global.config.general.logPort
+        logPort: global.config.general.logPort,
+        fastRebind: target.fastRebind
       }
     })
   })
