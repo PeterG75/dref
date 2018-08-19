@@ -66,8 +66,7 @@ export default class DNSAnswer {
     // qdcount
     header.writeUInt16BE(0x01, 4)
     // ancount
-    if (this.addresses.length) header.writeUInt16BE(0x01, 6)
-    else header.writeUInt16BE(0x00, 6)
+    header.writeUInt16BE(1 * this.addresses.length, 6)
     // nscount
     header.writeUInt16BE(0x00, 8)
     // arcount
@@ -110,29 +109,33 @@ export default class DNSAnswer {
     /**
      * Return a buffer of the DNSAnswer answer section
      */
-    // answer_size is:
+    // record size is:
     // - 2 byte name pointer
     // - 2 byte type
     // - 2 byte class
     // - 4 byte ttl
     // - 2 byte rdlength
     // - 4 byte rdata for an A record
-    const answer = Buffer.alloc(16)
 
-    // name - pointer will always be 0xc00c (the first byte of the question)
-    answer.writeUInt16BE(0xc00c, 0)
-    // type
-    answer.writeUInt16BE(1, 2)
-    // class - always IN
-    answer.writeUInt16BE(1, 4)
-    // ttl
-    answer.writeUInt32BE(1, 6)
-    // rdlength - always 4 for A record
-    answer.writeUInt16BE(4, 10)
-    // rdata
-    const addressInts = this.addresses[0].split('.')
-    for (let i = 0; i < addressInts.length; i++) {
-      answer.writeUInt8(addressInts[i], 12 + i)
+    // allocate 16 bytes for each record
+    const answer = Buffer.alloc(16 * this.addresses.length)
+
+    for (let i = 0; i < this.addresses.length; i++) {
+      // name - pointer will always be 0xc00c (the first byte of the question)
+      answer.writeUInt16BE(0xc00c, 0 + 16 * i)
+      // type
+      answer.writeUInt16BE(1, 2 + 16 * i)
+      // class - always IN
+      answer.writeUInt16BE(1, 4 + 16 * i)
+      // ttl
+      answer.writeUInt32BE(1, 6 + 16 * i)
+      // rdlength - always 4 for A record
+      answer.writeUInt16BE(4, 10 + 16 * i)
+      // rdata
+      const addressInts = this.addresses[i].split('.')
+      for (let j = 0; j < addressInts.length; j++) {
+        answer.writeUInt8(addressInts[j], 12 + j + 16 * i)
+      }
     }
 
     return answer
