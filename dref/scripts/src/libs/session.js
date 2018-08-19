@@ -70,18 +70,22 @@ export default class Session {
             window.setTimeout(() => {
               wait(time)
             }, time)
-          }, function () {
+          }, function (code) {
             // fail callback
-            // if we're getting an error it means we've rebinded
+
+            // if we get an error code of 0 it means we're using fast-rebind
+            // and we've not yet rebinded
+            if (code === 0) {
+              window.setTimeout(() => {
+                wait(time)
+              }, time)
+            } else {
+            // if we're getting another error it means we've rebinded
             // (ie: the test path /checkpoint doesn't exist on the host)
-            resolve()
+              resolve()
+            }
           }, function () {
             // timeout callback
-            // timeout happens with fast-rebind when we've not rebinded to the
-            // target yet (or the host is not live/can't answer)
-            window.setTimeout(() => {
-              wait(time)
-            }, time)
           })
         }
         wait(2000)
