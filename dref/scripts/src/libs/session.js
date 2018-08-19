@@ -46,7 +46,8 @@ export default class Session {
     network.postJSON(this.baseURL + '/arecords', {
       domain: target + '.' + window.env.domain,
       address: address,
-      port: port
+      port: port,
+      dual: fastRebind
     })
 
     // create the iframe

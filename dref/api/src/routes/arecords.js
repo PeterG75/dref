@@ -11,7 +11,8 @@ router.post('/', [
   check('domain').matches(/^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$/),
   check('address').optional().matches(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/),
   check('port').optional().isInt({min: 1, max: 65535}),
-  check('rebind').optional().isBoolean()
+  check('rebind').optional().isBoolean(),
+  check('dual').optional().isBoolean()
 ], function (req, res, next) {
   const errors = validationResult(req)
 
@@ -25,6 +26,7 @@ router.post('/', [
   if (typeof req.body.address !== 'undefined') record.address = req.body.address
   if (typeof req.body.port !== 'undefined') record.port = req.body.port
   if (typeof req.body.rebind !== 'undefined') record.rebind = req.body.rebind
+  if (typeof req.body.dual !== 'undefined') record.dual = req.body.dual
 
   ARecord.findOneAndUpdate({
     domain: req.body.domain
