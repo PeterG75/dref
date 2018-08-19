@@ -1,5 +1,5 @@
 export default class DNSAnswer {
-  constructor (id, qname, qtype, address = null) {
+  constructor (id, qname, qtype, addresses = []) {
     /**
      * Constructs a DNSAnswer object based on the RFC
      * https://tools.ietf.org/html/rfc1035#section-4.1.3
@@ -10,7 +10,7 @@ export default class DNSAnswer {
     this.id = id
     this.qname = qname
     this.qtype = qtype
-    this.address = address
+    this.addresses = addresses
   }
 
   toBuffer () {
@@ -21,7 +21,7 @@ export default class DNSAnswer {
     const header = this._getHeaderBuffer()
     const question = this._getQuestionBuffer()
 
-    if (this.address) {
+    if (this.addresses.length) {
       return Buffer.concat([header, question, this._getAnswerBuffer()])
     } else {
       return Buffer.concat([header, question])
@@ -60,13 +60,13 @@ export default class DNSAnswer {
      *
      * which gives us 0x00 for normal answer and 0x01 for error
      */
-    if (this.address) header.writeUInt8(0x00, 3)
+    if (this.addresses.length) header.writeUInt8(0x00, 3)
     else header.writeUInt8(0x04, 3)
 
     // qdcount
     header.writeUInt16BE(0x01, 4)
     // ancount
-    if (this.address) header.writeUInt16BE(0x01, 6)
+    if (this.addresses.length) header.writeUInt16BE(0x01, 6)
     else header.writeUInt16BE(0x00, 6)
     // nscount
     header.writeUInt16BE(0x00, 8)
@@ -130,7 +130,7 @@ export default class DNSAnswer {
     // rdlength - always 4 for A record
     answer.writeUInt16BE(4, 10)
     // rdata
-    const addressInts = this.address.split('.')
+    const addressInts = this.addresses[0].split('.')
     for (let i = 0; i < addressInts.length; i++) {
       answer.writeUInt8(addressInts[i], 12 + i)
     }

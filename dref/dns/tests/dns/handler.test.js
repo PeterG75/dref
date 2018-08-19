@@ -35,7 +35,7 @@ test('returns answer with address for A record of default domain', async () => {
   ])
 
   await handler.query(queryData, rinfo).then(answer => {
-    expect(answer.address).toBeTruthy()
+    expect(answer.addresses).toBeTruthy()
   })
 })
 
@@ -52,7 +52,7 @@ test('returns answer without address for A record of unknown domain', async () =
   ])
 
   await handler.query(queryData, rinfo).then(answer => {
-    expect(answer.address).toBeNull()
+    expect(answer.addresses.length).toEqual(0)
   })
 })
 
@@ -69,7 +69,7 @@ test('returns answer without address for non-A record', async () => {
   ])
 
   await handler.query(queryData, rinfo).then(answer => {
-    expect(answer.address).toBeNull()
+    expect(answer.addresses.length).toEqual(0)
   })
 })
 
@@ -119,7 +119,7 @@ test('returns answer with default address for A record when no rebind', async ()
   ])
 
   await handler.query(queryData, rinfo).then(answer => {
-    expect(answer.address).toEqual('10.0.0.1')
+    expect(answer.addresses).toEqual(['10.0.0.1'])
   })
 })
 
@@ -136,6 +136,6 @@ test('returns answer with defined address for A record when rebind', async () =>
   ])
 
   await handler.query(queryData, rinfo).then(answer => {
-    expect(answer.address).toEqual('1.2.3.4')
+    expect(answer.addresses).toEqual(['1.2.3.4'])
   })
 })
