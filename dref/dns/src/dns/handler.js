@@ -21,14 +21,17 @@ export default class DNSHandler {
       }
 
       // A query (qtype === 1)
-      this._lookup(query.qname.toLowerCase()).then(address => {
-        if (address) {
-          resolve(new DNSAnswer(query.id, query.qname, query.qtype, [address]))
+      this._lookup(query.qname.toLowerCase()).then(record => {
+        let addresses = []
+
+        if (record) {
+          if (record.rebind) addresses.push(record.address)
+          else addresses.push(global.config.general.address)
         } else if (query.qname.endsWith(global.config.general.domain)) {
-          resolve(new DNSAnswer(query.id, query.qname, query.qtype, [global.config.general.address]))
-        } else {
-          resolve(new DNSAnswer(query.id, query.qname, query.qtype))
+          addresses.push(global.config.general.address)
         }
+
+        resolve(new DNSAnswer(query.id, query.qname, query.qtype, addresses))
       })
     })
   }
@@ -37,8 +40,7 @@ export default class DNSHandler {
     return new Promise((resolve) => {
       ARecord.findOne({domain: domain}, (err, record) => {
         if (err || record === null) resolve(null)
-        else if (record.rebind) resolve(record.address)
-        else resolve(global.config.general.address)
+        resolve(record)
       })
     })
   }
