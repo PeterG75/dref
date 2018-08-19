@@ -26,7 +26,6 @@ export default class Session {
     payload.d = btoa(crypto.rc4(this.sessionKey, JSON.stringify(logData)))
 
     network.postJSON(this.logURL, payload)
-    console.log('logged: ' + JSON.stringify(payload, null, 2))
   }
 
   createRebindFrame (address, port, {target, script, args} = {}) {
@@ -76,7 +75,6 @@ export default class Session {
             }, time)
           }, function () {
             // a timeout means we're not rebinded yet
-            console.log('/checkpoint timeout - ' + time)
             callWait(time * 2)
           })
         }
