@@ -30,7 +30,7 @@ export default class Session {
 
   createRebindFrame (address, port, {target, script, fastRebind, args} = {}) {
     target = target || crypto.randomHex(24)
-    fastRebind = fastRebind || false
+    fastRebind = fastRebind || window.env.fastRebind
     args = args || {}
     args._rebind = true
 
