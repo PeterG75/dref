@@ -25,8 +25,21 @@ export default class DNSHandler {
         let addresses = []
 
         if (record) {
-          if (record.rebind) addresses.push(record.address)
-          else addresses.push(global.config.general.address)
+          if (record.dual) {
+            // return both the target address and the default address when using
+            // dual A record mode ("fast rebind")
+            addresses.push(global.config.general.address)
+            addresses.push(record.address)
+          } else if (record.rebind) {
+            // "slow rebind" uses a single A record after payload-defined
+            // trigger
+            addresses.push(record.address)
+          } else {
+            // if there's a record for this target but we're not using fast
+            // rebind and we've not received a trigger for slow rebind
+            // we just dish out the default
+            addresses.push(global.config.general.address)
+          }
         } else if (query.qname.endsWith(global.config.general.domain)) {
           addresses.push(global.config.general.address)
         }

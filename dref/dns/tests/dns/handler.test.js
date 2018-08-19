@@ -13,8 +13,8 @@ beforeAll(async () => {
   await mongoose.connect(mongoUri, {}, (err) => {
     if (err) console.error(err)
   })
-  await ARecord.create({domain: 'x.hello.com', address: '1.2.3.4', rebind: 'false'})
-  await ARecord.create({domain: 'y.hello.com', address: '1.2.3.4', rebind: 'true'})
+  await ARecord.create({domain: 'x.hello.com', address: '1.2.3.4', rebind: false})
+  await ARecord.create({domain: 'y.hello.com', address: '1.2.3.4', rebind: true})
 })
 
 afterAll(() => {
@@ -84,19 +84,15 @@ test('returns null on parsing error', async () => {
   })
 })
 
-test('_lookup() returns default address for existing record when no rebind', async () => {
+test('_lookup() returns a known record', async () => {
   global.config = {general: {domain: 'hello.com', address: '10.0.0.1'}}
 
-  await (new DNSHandler())._lookup('x.hello.com').then(address => {
-    expect(address).toEqual('10.0.0.1')
-  })
-})
-
-test('_lookup() returns defined address for existing record when rebind', async () => {
-  global.config = {general: {domain: 'hello.com', address: '10.0.0.1'}}
-
-  await (new DNSHandler())._lookup('y.hello.com').then(address => {
-    expect(address).toEqual('1.2.3.4')
+  await (new DNSHandler())._lookup('x.hello.com').then(record => {
+    expect(record).toMatchObject({
+      domain: 'x.hello.com',
+      address: '1.2.3.4',
+      rebind: false
+    })
   })
 })
 
