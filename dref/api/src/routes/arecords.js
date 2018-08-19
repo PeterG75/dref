@@ -34,6 +34,14 @@ router.post('/', [
       return res.status(400).send()
     }
 
+    // if this isn't a dual record then fastRebind is not in use
+    // we don't need to manipulate iptables and we end here
+    if (!doc.dual) {
+      return res.status(204).send()
+    }
+
+    // if we're using fast-rebind, we'll proceed to block the victim's ip:port
+    // using iptables
     const ipv4Match = req.ip.match(/::ffff:(\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3})/)
     if (!ipv4Match) {
       console.log(`source IP ${req.ip} doesn't appear to be IPv4, can't manipulate iptables and fast-rebind not available`)
